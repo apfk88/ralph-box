@@ -1,9 +1,9 @@
-# Devtools containers (Codex + Claude Code)
+# ralph-box
 
 Two Docker images for AI-assisted development:
 
-- **devtools-standard**: Claude Code + Codex CLI for interactive use (tmux, shells, etc.)
-- **devtools-ralph**: Same tools, plus a "Ralph Wiggum" outer loop harness that repeatedly runs an agent against a prompt until a completion marker appears
+- **standard**: Claude Code + Codex CLI for interactive use (tmux, shells, etc.)
+- **ralph**: Same tools, plus a "Ralph Wiggum" outer loop harness that repeatedly runs an agent against a prompt until a completion marker appears
 
 Both CLIs are installed via npm:
 - `@openai/codex` - OpenAI Codex CLI
@@ -15,10 +15,21 @@ Both CLIs are installed via npm:
 docker compose build
 ```
 
+## Repo restrictions
+
+Agents have full local access but `git push` is restricted to repos you whitelist per-session via `ALLOWED_REPOS`:
+
+```bash
+# Allow pushes only to these repos for this session
+ALLOWED_REPOS=apfk88/ralph-box,apfk88/my-project docker compose run --rm standard
+```
+
+If `ALLOWED_REPOS` is not set, all pushes are blocked. The agent can still clone, pull, and commit locally - only push is gated.
+
 ## Standard shell
 
 ```bash
-docker compose run --rm standard
+ALLOWED_REPOS=owner/repo docker compose run --rm standard
 ```
 
 Inside the container you have access to:
@@ -30,7 +41,7 @@ Inside the container you have access to:
 ## Ralph loop container
 
 ```bash
-docker compose run --rm ralph
+ALLOWED_REPOS=owner/repo docker compose run --rm ralph
 ```
 
 ### Example: loop Claude on a prompt until it prints a marker

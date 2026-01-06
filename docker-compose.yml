@@ -12,6 +12,7 @@ services:
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - ALLOWED_REPOS=${ALLOWED_REPOS:-}
 
   ralph:
     build:
@@ -26,6 +27,7 @@ services:
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - ALLOWED_REPOS=${ALLOWED_REPOS:-}
 
 volumes:
   standard-home:
