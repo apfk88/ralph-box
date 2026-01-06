@@ -11,8 +11,8 @@ RUN npm install -g @openai/codex @anthropic-ai/claude-code
 COPY scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
-RUN useradd -m -u 1000 dev
-USER dev
+# Use existing node user (UID 1000) from base image
+USER node
 
 # Set up aliases for convenience (auto-approve flags for container use)
 RUN echo 'alias claude="claude --dangerously-skip-permissions"' >> ~/.bashrc \

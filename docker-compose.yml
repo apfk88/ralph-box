@@ -8,7 +8,7 @@ services:
     working_dir: /work
     volumes:
       - ./:/work
-      - ralph-home:/home/dev
+      - ralph-home:/home/node
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
