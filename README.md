@@ -17,19 +17,26 @@ docker compose build
 
 ## Repo restrictions
 
-Agents have full local access but `git push` is restricted to repos you whitelist per-session via `ALLOWED_REPOS`:
+Use a GitHub fine-grained PAT to restrict which repos the agent can push to. Create one at:
+
+**https://github.com/settings/tokens?type=beta**
+
+Configure it with:
+- **Repository access** → "Only select repositories" → pick allowed repos
+- **Permissions** → "Contents" → "Read and write"
+
+Then pass it to the container:
 
 ```bash
-# Allow pushes only to these repos for this session
-ALLOWED_REPOS=apfk88/ralph-box,apfk88/my-project docker compose run --rm standard
+GITHUB_TOKEN=github_pat_xxx docker compose run --rm standard
 ```
 
-If `ALLOWED_REPOS` is not set, all pushes are blocked. The agent can still clone, pull, and commit locally - only push is gated.
+The token is automatically configured as git credentials on container start. GitHub enforces the repo restrictions server-side - the agent literally cannot push to repos outside the token's scope.
 
 ## Standard shell
 
 ```bash
-ALLOWED_REPOS=owner/repo docker compose run --rm standard
+docker compose run --rm standard
 ```
 
 Inside the container you have access to:
@@ -41,7 +48,7 @@ Inside the container you have access to:
 ## Ralph loop container
 
 ```bash
-ALLOWED_REPOS=owner/repo docker compose run --rm ralph
+GITHUB_TOKEN=github_pat_xxx docker compose run --rm ralph
 ```
 
 ### Example: loop Claude on a prompt until it prints a marker
@@ -87,11 +94,11 @@ This creates backpressure through git diffs, builds, and tests, allowing the age
 
 ## Authentication
 
+### AI services
+
 Home directories are persisted via Docker volumes, so auth tokens survive container restarts.
 
-### Option 1: CLI login (default)
-
-Start a container and authenticate interactively:
+**Option 1: CLI login (default)**
 
 ```bash
 docker compose run --rm standard
@@ -101,11 +108,7 @@ claude login          # Opens browser for Anthropic auth
 codex login           # Opens browser for OpenAI/ChatGPT auth
 ```
 
-Auth tokens are stored in the persistent home volume.
-
-### Option 2: API keys
-
-If you prefer API keys, set them in your environment or a `.env` file:
+**Option 2: API keys**
 
 ```bash
 # .env file or export in shell
@@ -113,7 +116,20 @@ OPENAI_API_KEY=your-openai-key
 ANTHROPIC_API_KEY=your-anthropic-key
 ```
 
-Then run containers as usual - keys are passed through automatically.
+### GitHub
+
+**Option 1: Fine-grained PAT (recommended for agents)**
+
+Restricts which repos the agent can access. See "Repo restrictions" above.
+
+**Option 2: CLI login**
+
+```bash
+# Inside the container:
+gh auth login
+```
+
+Note: CLI login grants access to all your repos - use PAT for restricted sessions.
 
 ## Notes
 

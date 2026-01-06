@@ -9,18 +9,17 @@ RUN apt-get update && apt-get install -y \
 # Install agent CLIs globally
 RUN npm install -g @openai/codex @anthropic-ai/claude-code
 
-# Add git-guard wrapper to restrict pushes to allowed repos only
-COPY --chmod=755 scripts/git-guard.sh /usr/local/bin/git-guard
+# Entrypoint sets up git credentials when GITHUB_TOKEN is provided
+COPY --chmod=755 scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
 
 # Non-root user
 RUN useradd -m -u 1000 dev
 USER dev
 
 # Set up aliases for convenience (auto-approve flags for container use)
-# git is aliased to git-guard to enforce ALLOWED_REPOS
 RUN echo 'alias claude="claude --dangerously-skip-permissions"' >> ~/.bashrc \
- && echo 'alias codex="codex --yolo"' >> ~/.bashrc \
- && echo 'alias git="git-guard"' >> ~/.bashrc
+ && echo 'alias codex="codex --yolo"' >> ~/.bashrc
 
 WORKDIR /work
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["bash"]
