@@ -9,13 +9,9 @@ services:
     working_dir: /work
     volumes:
       - ./:/work
-      - ralph-home:/home/ralph
     environment:
       - HOME=/home/ralph
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
       - GITHUB_TOKEN=${GITHUB_TOKEN:-}
       - REPO_URL=${REPO_URL:-}
-
-volumes:
-  ralph-home:
