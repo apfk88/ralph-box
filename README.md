@@ -89,13 +89,30 @@ docker-compose build
 
 ## Running Ralph
 
-### Start a tmux session and run
+### Quick start (with REPO_URL)
 
 ```bash
 # Start tmux session
 tmux new -s ralph
 
-# Run the container
+# Run with auto-clone
+REPO_URL=https://github.com/your/repo.git docker-compose run --rm ralph
+
+# Inside container (already in repo dir with ralph scripts copied):
+# Edit prd.json with your user stories
+# Edit progress.txt with codebase context
+
+# Run Ralph
+ralph 25
+
+# Detach from tmux: Ctrl+B, then D
+# Reattach later: tmux attach -t ralph
+```
+
+### Manual setup
+
+```bash
+tmux new -s ralph
 docker-compose run --rm ralph
 
 # Inside container: clone your repo
@@ -105,14 +122,8 @@ cd repo
 # Copy ralph scripts into the repo
 cp -r /work/scripts/ralph scripts/
 
-# Edit prd.json with your user stories
-# Edit progress.txt with codebase context
-
 # Run Ralph
-./scripts/ralph/ralph.sh 25
-
-# Detach from tmux: Ctrl+B, then D
-# Reattach later: tmux attach -t ralph
+ralph 25
 ```
 
 ### Review and push (from VM, outside container)
@@ -126,57 +137,37 @@ git push
 
 ## Running Multiple Ralph Sessions
 
-All containers share `/work/` (mounted from ralph-box dir). Clone each repo into its own subdirectory:
-
-```bash
-/work/
-├── repo-a/
-│   └── scripts/ralph/   # copy ralph scripts here
-├── repo-b/
-│   └── scripts/ralph/   # copy ralph scripts here
-```
-
-### Setup
-
-```bash
-# Inside container
-cd /work
-git clone https://github.com/you/repo-a.git
-git clone https://github.com/you/repo-b.git
-
-# Copy ralph scripts into each repo
-cp -r /work/scripts/ralph repo-a/scripts/
-cp -r /work/scripts/ralph repo-b/scripts/
-
-# Customize prd.json and progress.txt for each
-```
-
-### Run in separate tmux windows
+Run multiple repos in separate tmux windows:
 
 ```bash
 tmux new -s ralph
 
 # Window 0: repo-a
-docker-compose run --rm ralph
-cd /work/repo-a && ./scripts/ralph/ralph.sh 25
+REPO_URL=https://github.com/you/repo-a.git docker-compose run --rm ralph
+ralph 25
 
 # Create new window: Ctrl+B, then C
-# Window 1: repo-b (new container)
-docker-compose run --rm ralph
-cd /work/repo-b && ./scripts/ralph/ralph.sh 25
+# Window 1: repo-b
+REPO_URL=https://github.com/you/repo-b.git docker-compose run --rm ralph
+ralph 25
 
 # Switch windows: Ctrl+B, then N (next) or P (previous)
 # List windows: Ctrl+B, then W
 # Detach: Ctrl+B, then D
 ```
 
-### Or use separate tmux sessions
+Or use separate tmux sessions:
 
 ```bash
-tmux new -s repo-a -d "docker-compose run --rm ralph bash -c 'cd /work/repo-a && ./scripts/ralph/ralph.sh 50'"
-tmux new -s repo-b -d "docker-compose run --rm ralph bash -c 'cd /work/repo-b && ./scripts/ralph/ralph.sh 50'"
+tmux new -s repo-a
+REPO_URL=https://github.com/you/repo-a.git docker-compose run --rm ralph
+# Ctrl+B, D to detach
 
-# Check on them
+tmux new -s repo-b
+REPO_URL=https://github.com/you/repo-b.git docker-compose run --rm ralph
+# Ctrl+B, D to detach
+
+# List sessions
 tmux ls
 tmux attach -t repo-a
 ```

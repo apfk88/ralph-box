@@ -1,12 +1,50 @@
 #!/usr/bin/env bash
-# Container entrypoint - sets up git credentials if GITHUB_TOKEN is provided
+# Container entrypoint
 
+# Set up git credentials if GITHUB_TOKEN is provided
 if [[ -n "${GITHUB_TOKEN:-}" ]]; then
-  # Configure git to use the token for GitHub HTTPS URLs
   git config --global credential.helper store
   echo "https://x-access-token:${GITHUB_TOKEN}@github.com" > ~/.git-credentials
   chmod 600 ~/.git-credentials
   echo "Git credentials configured from GITHUB_TOKEN"
 fi
+
+# Auto-clone repo if REPO_URL is set
+if [[ -n "${REPO_URL:-}" ]]; then
+  REPO_NAME=$(basename "${REPO_URL}" .git)
+  REPO_PATH="/work/${REPO_NAME}"
+
+  if [[ ! -d "${REPO_PATH}" ]]; then
+    echo "Cloning ${REPO_URL}..."
+    git clone "${REPO_URL}" "${REPO_PATH}"
+  else
+    echo "Repo already exists at ${REPO_PATH}"
+  fi
+
+  # Copy ralph scripts if not already present
+  if [[ ! -d "${REPO_PATH}/scripts/ralph" ]]; then
+    echo "Copying ralph scripts..."
+    mkdir -p "${REPO_PATH}/scripts"
+    cp -r /work/scripts/ralph "${REPO_PATH}/scripts/"
+  fi
+
+  cd "${REPO_PATH}"
+  echo "Working directory: ${REPO_PATH}"
+fi
+
+# Create ralph function for convenience
+cat >> ~/.bashrc << 'EOF'
+
+# Ralph shortcut
+ralph() {
+  local iterations="${1:-10}"
+  if [[ -f "./scripts/ralph/ralph.sh" ]]; then
+    ./scripts/ralph/ralph.sh "$iterations"
+  else
+    echo "ralph scripts not found in ./scripts/ralph/"
+    echo "Run from repo root or copy scripts first"
+  fi
+}
+EOF
 
 exec "$@"
