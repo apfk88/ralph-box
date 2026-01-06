@@ -7,16 +7,12 @@ RUN apt-get update && apt-get install -y \
 
 RUN npm install -g @openai/codex @anthropic-ai/claude-code
 
-# Entrypoint for GitHub token setup
+# Entrypoint for setup
 COPY scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
-# Use existing node user (UID 1000) from base image
-USER node
-
-# Set up aliases for convenience (auto-approve flags for container use)
-RUN echo 'alias claude="claude --dangerously-skip-permissions"' >> ~/.bashrc \
- && echo 'alias codex="codex --yolo"' >> ~/.bashrc
+# Create home directory for arbitrary user (will be mounted as volume)
+RUN mkdir -p /home/ralph && chmod 777 /home/ralph
 
 WORKDIR /work
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

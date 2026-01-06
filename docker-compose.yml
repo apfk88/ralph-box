@@ -5,12 +5,13 @@ services:
       dockerfile: images/ralph/Dockerfile
     tty: true
     stdin_open: true
-    user: "${UID:-1000}:${GID:-1000}"
+    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
     working_dir: /work
     volumes:
       - ./:/work
-      - ralph-home:/home/node
+      - ralph-home:/home/ralph
     environment:
+      - HOME=/home/ralph
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
       - GITHUB_TOKEN=${GITHUB_TOKEN:-}

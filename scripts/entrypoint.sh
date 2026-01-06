@@ -33,8 +33,12 @@ if [[ -n "${REPO_URL:-}" ]]; then
   echo "Ready: ${REPO_PATH}"
 fi
 
-# Create ralph function for convenience
+# Set up bashrc with aliases and ralph function
 cat >> ~/.bashrc << 'EOF'
+
+# Aliases
+alias claude="claude --dangerously-skip-permissions"
+alias codex="codex --yolo"
 
 # Ralph shortcut
 ralph() {
