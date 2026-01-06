@@ -33,66 +33,153 @@ scripts/ralph/
 └── progress.txt
 ```
 
-## Setup
+## GCP VM Setup
 
-### Build the container
+### Step 1: Install Docker + Docker Compose
 
 ```bash
-docker compose build
+# Install Docker
+curl -fsSL https://get.docker.com | sh
+
+# Add your user to docker group
+sudo usermod -aG docker $USER
+newgrp docker
+
+# Install docker-compose
+sudo apt-get update
+sudo apt-get install -y docker-compose
+
+# Verify
+docker --version
+docker-compose --version
 ```
 
-### GitHub access
+### Step 2: Install tmux (required for overnight runs)
 
-Agents get **read-only** GitHub access via a fine-grained PAT. Create one at:
-
-**https://github.com/settings/tokens?type=beta**
-
-Configure it with:
-- **Repository access** → "Only select repositories" or "All repositories"
-- **Permissions** → "Contents" → "Read-only"
-
-Add to `.env`:
 ```bash
+sudo apt-get install -y tmux
+```
+
+tmux keeps Ralph running even if your SSH connection drops.
+
+### Step 3: Clone ralph-box
+
+```bash
+git clone https://github.com/apfk88/ralph-box.git
+cd ralph-box
+```
+
+### Step 4: Create .env file
+
+```bash
+cat > .env << 'EOF'
+# GitHub read-only PAT (create at https://github.com/settings/tokens?type=beta)
 GITHUB_TOKEN=github_pat_xxx
+
+# Anthropic API key (or use `claude login` inside container)
+ANTHROPIC_API_KEY=sk-ant-xxx
+EOF
 ```
 
-Agents can clone and fetch but **cannot push**. All commits stay local in `/work/`.
-
-### AI authentication
-
-**Option 1: CLI login (default)**
+### Step 5: Build the container
 
 ```bash
-docker compose run --rm ralph
-
-# Inside the container:
-claude login          # Opens browser for Anthropic auth
-```
-
-**Option 2: API keys**
-
-```bash
-# .env file
-ANTHROPIC_API_KEY=your-anthropic-key
+docker-compose build
 ```
 
 ## Running Ralph
 
-```bash
-docker compose run --rm ralph
-```
-
-Then inside the container:
+### Start a tmux session and run
 
 ```bash
+# Start tmux session
+tmux new -s ralph
+
+# Run the container
+docker-compose run --rm ralph
+
+# Inside container: clone your repo
+git clone https://github.com/your/repo.git
+cd repo
+
+# Copy ralph scripts into the repo
+cp -r /work/scripts/ralph scripts/
+
+# Edit prd.json with your user stories
+# Edit progress.txt with codebase context
+
+# Run Ralph
 ./scripts/ralph/ralph.sh 25
+
+# Detach from tmux: Ctrl+B, then D
+# Reattach later: tmux attach -t ralph
 ```
 
-Runs up to 25 iterations. Ralph will:
-- Create the feature branch
-- Complete stories one by one
-- Commit after each
-- Stop when all pass
+### Review and push (from VM, outside container)
+
+```bash
+cd ~/ralph-box/repo-name
+git log --oneline
+# If approved, push with your own creds
+git push
+```
+
+## Running Multiple Ralph Sessions
+
+All containers share `/work/` (mounted from ralph-box dir). Clone each repo into its own subdirectory:
+
+```bash
+/work/
+├── repo-a/
+│   └── scripts/ralph/   # copy ralph scripts here
+├── repo-b/
+│   └── scripts/ralph/   # copy ralph scripts here
+```
+
+### Setup
+
+```bash
+# Inside container
+cd /work
+git clone https://github.com/you/repo-a.git
+git clone https://github.com/you/repo-b.git
+
+# Copy ralph scripts into each repo
+cp -r /work/scripts/ralph repo-a/scripts/
+cp -r /work/scripts/ralph repo-b/scripts/
+
+# Customize prd.json and progress.txt for each
+```
+
+### Run in separate tmux windows
+
+```bash
+tmux new -s ralph
+
+# Window 0: repo-a
+docker-compose run --rm ralph
+cd /work/repo-a && ./scripts/ralph/ralph.sh 25
+
+# Create new window: Ctrl+B, then C
+# Window 1: repo-b (new container)
+docker-compose run --rm ralph
+cd /work/repo-b && ./scripts/ralph/ralph.sh 25
+
+# Switch windows: Ctrl+B, then N (next) or P (previous)
+# List windows: Ctrl+B, then W
+# Detach: Ctrl+B, then D
+```
+
+### Or use separate tmux sessions
+
+```bash
+tmux new -s repo-a -d "docker-compose run --rm ralph bash -c 'cd /work/repo-a && ./scripts/ralph/ralph.sh 50'"
+tmux new -s repo-b -d "docker-compose run --rm ralph bash -c 'cd /work/repo-b && ./scripts/ralph/ralph.sh 50'"
+
+# Check on them
+tmux ls
+tmux attach -t repo-a
+```
 
 ## Configuration
 
@@ -194,20 +281,37 @@ Two places for learnings:
 - `progress.txt` — session memory for Ralph iterations
 - `AGENTS.md` — permanent docs for humans and future agents
 
-## Workflow
+## GitHub Access
 
-1. Agent clones repos into `/work/` and makes commits locally
-2. When done, review their work from your host:
-   ```bash
-   cd ./repo-name
-   git log
-   ```
-3. Push with your own credentials when you approve:
-   ```bash
-   git push
-   ```
+Agents get **read-only** GitHub access via a fine-grained PAT. Create one at:
 
-The `/work/` directory is mounted from your host, so all agent work persists after the container exits.
+**https://github.com/settings/tokens?type=beta**
+
+Configure it with:
+- **Repository access** → "Only select repositories" or "All repositories"
+- **Permissions** → "Contents" → "Read-only"
+
+Agents can clone and fetch but **cannot push**. All commits stay local in `/work/`.
+
+## AI Authentication
+
+**Option 1: CLI login (default)**
+
+```bash
+docker-compose run --rm ralph
+
+# Inside the container:
+claude login          # Opens browser for Anthropic auth
+```
+
+**Option 2: API keys**
+
+```bash
+# .env file
+ANTHROPIC_API_KEY=your-anthropic-key
+```
+
+Home directory is persisted via Docker volume, so auth tokens survive container restarts.
 
 ## Monitoring
 
@@ -246,7 +350,6 @@ If typecheck requires other changes, make them. Not scope creep.
 ## Notes
 
 - Claude Code runs with `--dangerously-skip-permissions` since the container environment is isolated
-- Home directory is persisted via Docker volume, so auth tokens survive container restarts
 - Claude config lives at `~/.claude/`
 
 ## Credits
