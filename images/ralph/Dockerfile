@@ -8,7 +8,8 @@ RUN apt-get update && apt-get install -y \
 RUN npm install -g @openai/codex @anthropic-ai/claude-code
 
 # Entrypoint for GitHub token setup
-COPY --chmod=755 scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
 RUN useradd -m -u 1000 dev
 USER dev
