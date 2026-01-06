@@ -1,0 +1,32 @@
+services:
+  standard:
+    build:
+      context: .
+      dockerfile: images/standard/Dockerfile
+    tty: true
+    stdin_open: true
+    working_dir: /work
+    volumes:
+      - ./:/work
+      - standard-home:/home/dev
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+
+  ralph:
+    build:
+      context: .
+      dockerfile: images/ralph/Dockerfile
+    tty: true
+    stdin_open: true
+    working_dir: /work
+    volumes:
+      - ./:/work
+      - ralph-home:/home/dev
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+
+volumes:
+  standard-home:
+  ralph-home:
