@@ -10,8 +10,8 @@ Each iteration is a fresh context window (keeping threads small). Memory persist
 
 A bash loop that:
 1. Pipes a prompt into your AI agent
-2. Agent picks the next story from `prd.json`
-3. Agent implements it
+2. Agent picks high priority tasks from `tasks.md`
+3. Agent implements it using subagents
 4. Agent runs typecheck + tests
 5. Agent commits if passing
 6. Agent marks story done
@@ -20,8 +20,9 @@ A bash loop that:
 
 Memory persists only through:
 - Git commits
-- `progress.txt` (learnings)
-- `prd.json` (task status)
+- `progress.md` (progress)
+- `tasks.md` (task status)
+- `agents.md` (agent learnings)
 
 ## File Structure
 
@@ -29,8 +30,8 @@ Memory persists only through:
 scripts/ralph/
 ├── ralph.sh
 ├── prompt.md
-├── prd.json
-└── progress.txt
+├── tasks.md
+└── progress.md
 ```
 
 ## GCP VM Setup
