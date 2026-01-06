@@ -37,8 +37,11 @@ if [[ -n "${REPO_URL:-}" ]]; then
   echo "Ready: ${REPO_PATH}"
 fi
 
-# Set up bashrc with aliases and ralph function
+# Set up bashrc with prompt, aliases and ralph function
 cat >> ~/.bashrc << 'EOF'
+
+# Custom prompt (since UID not in /etc/passwd)
+export PS1='ralph@\h:\w\$ '
 
 # Aliases
 alias claude="claude --dangerously-skip-permissions"
