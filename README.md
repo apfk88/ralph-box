@@ -137,106 +137,6 @@ tmux ls
 tmux attach -t repo-a
 ```
 
-## Configuration
-
-### prd.json
-
-Your task list:
-
-```json
-{
-  "branchName": "ralph/feature",
-  "userStories": [
-    {
-      "id": "US-001",
-      "title": "Add login form",
-      "acceptanceCriteria": [
-        "Email/password fields",
-        "Validates email format",
-        "typecheck passes"
-      ],
-      "priority": 1,
-      "passes": false,
-      "notes": ""
-    }
-  ]
-}
-```
-
-Key fields:
-- `branchName` — branch to use
-- `priority` — lower = first
-- `passes` — set true when done
-
-### progress.txt
-
-Start with context:
-
-```markdown
-# Ralph Progress Log
-Started: 2024-01-15
-
-## Codebase Patterns
-- Migrations: IF NOT EXISTS
-- Types: Export from actions.ts
-
-## Key Files
-- db/schema.ts
-- app/auth/actions.ts
----
-```
-
-Ralph appends after each story. Patterns accumulate across iterations.
-
-### prompt.md
-
-Instructions for each iteration. Customize for your project.
-
-## Critical Success Factors
-
-### 1. Small Stories
-
-Must fit in one context window.
-
-```
-❌ Too big:
-"Build entire auth system"
-
-✅ Right size:
-"Add login form"
-"Add email validation"
-"Add auth server action"
-```
-
-### 2. Feedback Loops
-
-Ralph needs fast feedback:
-- `npm run typecheck`
-- `npm test`
-
-Without these, broken code compounds.
-
-### 3. Explicit Criteria
-
-```
-❌ Vague:
-"Users can log in"
-
-✅ Explicit:
-- Email/password fields
-- Validates email format
-- Shows error on failure
-- typecheck passes
-```
-
-### 4. Learnings Compound
-
-By story 10, Ralph knows patterns from stories 1-9.
-
-Two places for learnings:
-- `progress.txt` — session memory for Ralph iterations
-- `AGENTS.md` — permanent docs for humans and future agents
-
 ## GitHub Access
 
 Agents get **read-only** GitHub access via a fine-grained PAT. Create one at:
@@ -281,27 +181,6 @@ cat scripts/ralph/progress.txt
 # Commits
 git log --oneline -10
 ```
-
-## Common Gotchas
-
-**Idempotent migrations:**
-```sql
-ADD COLUMN IF NOT EXISTS email TEXT;
-```
-
-**Interactive prompts:**
-```bash
-echo -e "\n\n\n" | npm run db:generate
-```
-
-**Schema changes:**
-After editing schema, check:
-- Server actions
-- UI components
-- API routes
-
-**Fixing related files is OK:**
-If typecheck requires other changes, make them. Not scope creep.
 
 ## Notes
 
