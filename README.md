@@ -15,23 +15,37 @@ Both CLIs are installed via npm:
 docker compose build
 ```
 
-## Repo restrictions
+## GitHub access
 
-Use a GitHub fine-grained PAT to restrict which repos the agent can push to. Create one at:
+Agents get **read-only** GitHub access via a fine-grained PAT. Create one at:
 
 **https://github.com/settings/tokens?type=beta**
 
 Configure it with:
-- **Repository access** → "Only select repositories" → pick allowed repos
-- **Permissions** → "Contents" → "Read and write"
+- **Repository access** → "Only select repositories" or "All repositories"
+- **Permissions** → "Contents" → "Read-only"
 
-Then pass it to the container:
-
+Add to `.env`:
 ```bash
-GITHUB_TOKEN=github_pat_xxx docker compose run --rm standard
+GITHUB_TOKEN=github_pat_xxx
 ```
 
-The token is automatically configured as git credentials on container start. GitHub enforces the repo restrictions server-side - the agent literally cannot push to repos outside the token's scope.
+Agents can clone and fetch but **cannot push**. All commits stay local in `/work/`.
+
+## Workflow
+
+1. Agent clones repos into `/work/` and makes commits locally
+2. When done, review their work from your host:
+   ```bash
+   cd ./repo-name
+   git log
+   ```
+3. Push with your own credentials when you approve:
+   ```bash
+   git push
+   ```
+
+The `/work/` directory is mounted from your host, so all agent work persists after the container exits.
 
 ## Standard shell
 
@@ -48,7 +62,7 @@ Inside the container you have access to:
 ## Ralph loop container
 
 ```bash
-GITHUB_TOKEN=github_pat_xxx docker compose run --rm ralph
+docker compose run --rm ralph
 ```
 
 ### Example: loop Claude on a prompt until it prints a marker
@@ -86,15 +100,13 @@ The Ralph harness implements the "agent in a loop" pattern:
 1. Read a prompt from a file
 2. Run the agent (claude or codex) with the prompt
 3. Run an optional check command (e.g., tests)
-4. If there are file changes, commit them
+4. If there are file changes, commit them locally
 5. If the agent outputs the completion marker, stop
 6. Otherwise, loop back to step 2
 
 This creates backpressure through git diffs, builds, and tests, allowing the agent to iterate toward a solution.
 
-## Authentication
-
-### AI services
+## AI authentication
 
 Home directories are persisted via Docker volumes, so auth tokens survive container restarts.
 
@@ -111,25 +123,10 @@ codex login           # Opens browser for OpenAI/ChatGPT auth
 **Option 2: API keys**
 
 ```bash
-# .env file or export in shell
+# .env file
 OPENAI_API_KEY=your-openai-key
 ANTHROPIC_API_KEY=your-anthropic-key
 ```
-
-### GitHub
-
-**Option 1: Fine-grained PAT (recommended for agents)**
-
-Restricts which repos the agent can access. See "Repo restrictions" above.
-
-**Option 2: CLI login**
-
-```bash
-# Inside the container:
-gh auth login
-```
-
-Note: CLI login grants access to all your repos - use PAT for restricted sessions.
 
 ## Notes
 
