@@ -6,9 +6,10 @@ services:
     tty: true
     stdin_open: true
     user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
-    working_dir: /work
+    working_dir: /repos
     volumes:
-      - ./:/work
+      - ./:/ralph
+      - ~/repos:/repos
     environment:
       - HOME=/home/ralph
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}

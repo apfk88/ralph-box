@@ -16,10 +16,7 @@ fi
 # Auto-clone repo if REPO_URL is set
 if [[ -n "${REPO_URL:-}" ]]; then
   REPO_NAME=$(basename "${REPO_URL}" .git)
-  REPO_PATH="/work/repos/${REPO_NAME}"
-
-  # Ensure repos directory exists
-  mkdir -p /work/repos
+  REPO_PATH="/repos/${REPO_NAME}"
 
   if [[ ! -d "${REPO_PATH}" ]]; then
     echo "Cloning ${REPO_URL}..."
@@ -32,7 +29,7 @@ if [[ -n "${REPO_URL:-}" ]]; then
   if [[ ! -d "${REPO_PATH}/scripts/ralph" ]]; then
     echo "Copying ralph scripts..."
     mkdir -p "${REPO_PATH}/scripts"
-    cp -r /work/scripts/ralph "${REPO_PATH}/scripts/"
+    cp -r /ralph/scripts/ralph "${REPO_PATH}/scripts/"
   fi
 
   # Add auto-cd to bashrc so shell starts in repo
