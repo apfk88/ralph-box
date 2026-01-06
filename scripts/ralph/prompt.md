@@ -25,6 +25,8 @@ Your task is to complete tasks in tasks.md using parrallel subagents.
 
 7. Commit: `feat: [ID] - [Title]`
 
+8. Repeat and choose more tasks.
+
 ## Progress.md Format
 
 APPEND to progress.md:
@@ -63,5 +65,3 @@ You do not have access to push your changes remotely. When you are done I will r
 
 If ALL stories pass, reply:
 <promise>COMPLETE</promise>
-
-Otherwise end normally.
