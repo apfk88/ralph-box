@@ -77,16 +77,7 @@ docker-compose --version
 sudo apt-get install -y tmux
 ```
 
-tmux keeps Ralph running even if your SSH connection drops.
-
-**Essential tmux commands:**
-| Command | Description |
-|---------|-------------|
-| `tmux new -s ralph` | Create new session named "ralph" |
-| `tmux attach -t ralph` | Reattach to session |
-| `tmux ls` | List all sessions |
-| `Ctrl+B, D` | Detach from session |
-| `Ctrl+B, [` | Scroll mode (q to exit) |
+tmux keeps Ralph running even if your SSH connection drops. See [tmux Reference](#tmux-reference) below.
 
 ### Step 5: Clone ralph-box
 
@@ -212,6 +203,47 @@ git log --oneline -10
 
 - Claude Code runs with `--dangerously-skip-permissions` since the container environment is isolated
 - Claude config lives at `~/.claude/`
+
+## tmux Reference
+
+All commands use `Ctrl+B` as the prefix (press Ctrl+B, release, then press the key).
+
+### Sessions
+| Command | Description |
+|---------|-------------|
+| `tmux new -s name` | Create new session |
+| `tmux attach -t name` | Attach to session |
+| `tmux ls` | List sessions |
+| `Ctrl+B, D` | Detach from session |
+| `Ctrl+B, $` | Rename session |
+
+### Windows (tabs)
+| Command | Description |
+|---------|-------------|
+| `Ctrl+B, C` | Create new window |
+| `Ctrl+B, N` | Next window |
+| `Ctrl+B, P` | Previous window |
+| `Ctrl+B, 0-9` | Switch to window by number |
+| `Ctrl+B, ,` | Rename window |
+| `Ctrl+B, &` | Kill window |
+
+### Panes (splits)
+| Command | Description |
+|---------|-------------|
+| `Ctrl+B, %` | Split vertical |
+| `Ctrl+B, "` | Split horizontal |
+| `Ctrl+B, Arrow` | Move between panes |
+| `Ctrl+B, X` | Kill pane |
+| `Ctrl+B, Z` | Toggle pane zoom (fullscreen) |
+| `Ctrl+B, Space` | Cycle pane layouts |
+
+### Scrolling
+| Command | Description |
+|---------|-------------|
+| `Ctrl+B, [` | Enter scroll mode |
+| `q` | Exit scroll mode |
+| `Up/Down` | Scroll line by line |
+| `PgUp/PgDn` | Scroll page by page |
 
 ## Credits
 
