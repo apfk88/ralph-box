@@ -7,9 +7,8 @@ RUN apt-get update && apt-get install -y \
 
 RUN npm install -g @openai/codex @anthropic-ai/claude-code
 
-# Entrypoint and Ralph harness
+# Entrypoint for GitHub token setup
 COPY --chmod=755 scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
-COPY --chmod=755 scripts/ralph-loop.sh /usr/local/bin/ralph-loop
 
 RUN useradd -m -u 1000 dev
 USER dev
