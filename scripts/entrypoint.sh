@@ -49,9 +49,8 @@ alias codex="codex --yolo"
 
 # Ralph shortcut
 ralph() {
-  local iterations="${1:-10}"
   if [[ -f "./scripts/ralph/ralph.sh" ]]; then
-    ./scripts/ralph/ralph.sh "$iterations"
+    ./scripts/ralph/ralph.sh "$@"
   else
     echo "ralph scripts not found in ./scripts/ralph/"
     echo "Run from repo root or copy scripts first"

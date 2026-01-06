@@ -115,11 +115,13 @@ tmux new -s ralph
 # or just: ./run.sh (will prompt)
 
 # Inside container (already in repo dir with ralph scripts copied):
-# Edit prd.json with your user stories
-# Edit progress.txt with codebase context
+# Edit tasks.md with your tasks
+# Edit progress.md with codebase context
 
 # Run Ralph
-ralph 25
+ralph           # unlimited iterations
+ralph 10        # max 10 iterations
+ralph -v        # verbose (raw CLI output)
 
 # Detach from tmux: Ctrl+B, then D
 # Reattach later: tmux attach -t ralph
@@ -141,12 +143,12 @@ Use separate tmux sessions for each repo:
 ```bash
 tmux new -s repo-a
 ./run.sh https://github.com/you/repo-a.git
-ralph 25
+ralph
 # Ctrl+B, D to detach
 
 tmux new -s repo-b
 ./run.sh https://github.com/you/repo-b.git
-ralph 25
+ralph
 # Ctrl+B, D to detach
 
 # List sessions
@@ -189,11 +191,11 @@ Home directory is persisted via Docker volume, so auth tokens survive container 
 ## Monitoring
 
 ```bash
-# Story status
-cat scripts/ralph/prd.json | jq '.userStories[] | {id, passes}'
+# Task status
+cat scripts/ralph/tasks.md
 
-# Learnings
-cat scripts/ralph/progress.txt
+# Progress log
+cat scripts/ralph/progress.md
 
 # Commits
 git log --oneline -10
