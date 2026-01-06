@@ -1,12 +1,6 @@
 # ralph-box
 
-Ralph is an autonomous AI coding loop that ships features while you sleep.
-
-Created by [@GeoffreyHuntley](https://x.com/GeoffreyHuntley), it runs Claude Code (or your agent of choice) repeatedly until all tasks are complete.
-
-Each iteration is a fresh context window (keeping threads small). Memory persists via git history and text files.
-
-## How It Works
+Ralph-box is a cozy, safe little house for Ralph - the never-stopping yoloing coding AGI - created by [@GeoffreyHuntley](https://x.com/GeoffreyHuntley).
 
 A bash loop that:
 1. Pipes a prompt into your AI agent
@@ -36,7 +30,29 @@ scripts/ralph/
 
 ## GCP VM Setup
 
-### Step 1: Install Docker + Docker Compose
+### Step 1: Provision VM
+
+```bash
+ZONE=us-central1-a  # or your preferred zone
+
+gcloud compute instances create ai-dev-1 \
+  --zone=$ZONE \
+  --machine-type=e2-standard-2 \
+  --image-family=ubuntu-2404-lts-amd64 \
+  --image-project=ubuntu-os-cloud \
+  --boot-disk-type=pd-ssd \
+  --boot-disk-size=100GB
+```
+
+### Step 2: SSH into VM
+
+```bash
+gcloud compute ssh ai-dev-1 --zone=us-central1-a
+```
+
+> **Optional:** Install [Tailscale](https://tailscale.com/download) on the VM and configure GCP to use Tailscale SSH for simpler, persistent access without gcloud.
+
+### Step 3: Install Docker + Docker Compose
 
 ```bash
 # Install Docker
@@ -55,7 +71,7 @@ docker --version
 docker-compose --version
 ```
 
-### Step 2: Install tmux (required for overnight runs)
+### Step 4: Install tmux (required for overnight runs)
 
 ```bash
 sudo apt-get install -y tmux
@@ -63,14 +79,23 @@ sudo apt-get install -y tmux
 
 tmux keeps Ralph running even if your SSH connection drops.
 
-### Step 3: Clone ralph-box
+**Essential tmux commands:**
+| Command | Description |
+|---------|-------------|
+| `tmux new -s ralph` | Create new session named "ralph" |
+| `tmux attach -t ralph` | Reattach to session |
+| `tmux ls` | List all sessions |
+| `Ctrl+B, D` | Detach from session |
+| `Ctrl+B, [` | Scroll mode (q to exit) |
+
+### Step 5: Clone ralph-box
 
 ```bash
 git clone https://github.com/apfk88/ralph-box.git
 cd ralph-box
 ```
 
-### Step 4: Create .env file
+### Step 6: Create .env file
 
 ```bash
 cat > .env << 'EOF'
@@ -82,7 +107,7 @@ ANTHROPIC_API_KEY=sk-ant-xxx
 EOF
 ```
 
-### Step 5: Build the container
+### Step 7: Build the container
 
 ```bash
 docker-compose build
