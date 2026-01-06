@@ -16,7 +16,10 @@ fi
 # Auto-clone repo if REPO_URL is set
 if [[ -n "${REPO_URL:-}" ]]; then
   REPO_NAME=$(basename "${REPO_URL}" .git)
-  REPO_PATH="/work/${REPO_NAME}"
+  REPO_PATH="/work/repos/${REPO_NAME}"
+
+  # Ensure repos directory exists
+  mkdir -p /work/repos
 
   if [[ ! -d "${REPO_PATH}" ]]; then
     echo "Cloning ${REPO_URL}..."
