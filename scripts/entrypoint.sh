@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # Container entrypoint
 
+# Set default git identity
+git config --global user.name "ralph"
+git config --global user.email "ralph@localhost"
+
 # Set up git credentials if GITHUB_TOKEN is provided
 if [[ -n "${GITHUB_TOKEN:-}" ]]; then
   git config --global credential.helper store
