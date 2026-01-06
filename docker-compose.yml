@@ -5,6 +5,7 @@ services:
       dockerfile: images/ralph/Dockerfile
     tty: true
     stdin_open: true
+    user: "${UID:-1000}:${GID:-1000}"
     working_dir: /work
     volumes:
       - ./:/work
