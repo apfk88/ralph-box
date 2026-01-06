@@ -89,14 +89,13 @@ docker-compose build
 
 ## Running Ralph
 
-### Quick start (with REPO_URL)
-
 ```bash
 # Start tmux session
 tmux new -s ralph
 
-# Run with auto-clone
-REPO_URL=https://github.com/your/repo.git docker-compose run --rm ralph
+# Run (prompts for repo URL, or pass as argument)
+./run.sh https://github.com/your/repo.git
+# or just: ./run.sh (will prompt)
 
 # Inside container (already in repo dir with ralph scripts copied):
 # Edit prd.json with your user stories
@@ -107,23 +106,6 @@ ralph 25
 
 # Detach from tmux: Ctrl+B, then D
 # Reattach later: tmux attach -t ralph
-```
-
-### Manual setup
-
-```bash
-tmux new -s ralph
-docker-compose run --rm ralph
-
-# Inside container: clone your repo
-git clone https://github.com/your/repo.git
-cd repo
-
-# Copy ralph scripts into the repo
-cp -r /work/scripts/ralph scripts/
-
-# Run Ralph
-ralph 25
 ```
 
 ### Review and push (from VM, outside container)
@@ -137,34 +119,17 @@ git push
 
 ## Running Multiple Ralph Sessions
 
-Run multiple repos in separate tmux windows:
-
-```bash
-tmux new -s ralph
-
-# Window 0: repo-a
-REPO_URL=https://github.com/you/repo-a.git docker-compose run --rm ralph
-ralph 25
-
-# Create new window: Ctrl+B, then C
-# Window 1: repo-b
-REPO_URL=https://github.com/you/repo-b.git docker-compose run --rm ralph
-ralph 25
-
-# Switch windows: Ctrl+B, then N (next) or P (previous)
-# List windows: Ctrl+B, then W
-# Detach: Ctrl+B, then D
-```
-
-Or use separate tmux sessions:
+Use separate tmux sessions for each repo:
 
 ```bash
 tmux new -s repo-a
-REPO_URL=https://github.com/you/repo-a.git docker-compose run --rm ralph
+./run.sh https://github.com/you/repo-a.git
+ralph 25
 # Ctrl+B, D to detach
 
 tmux new -s repo-b
-REPO_URL=https://github.com/you/repo-b.git docker-compose run --rm ralph
+./run.sh https://github.com/you/repo-b.git
+ralph 25
 # Ctrl+B, D to detach
 
 # List sessions
