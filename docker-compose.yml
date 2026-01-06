@@ -1,19 +1,4 @@
 services:
-  standard:
-    build:
-      context: .
-      dockerfile: images/standard/Dockerfile
-    tty: true
-    stdin_open: true
-    working_dir: /work
-    volumes:
-      - ./:/work
-      - standard-home:/home/dev
-    environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
-      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
-
   ralph:
     build:
       context: .
@@ -30,5 +15,4 @@ services:
       - GITHUB_TOKEN=${GITHUB_TOKEN:-}
 
 volumes:
-  standard-home:
   ralph-home:

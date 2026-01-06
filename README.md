@@ -1,11 +1,8 @@
 # ralph-box
 
-Two Docker images for AI-assisted development:
+A "Ralph Wiggum" outer loop harness that repeatedly runs an AI agent against a prompt until a completion marker appears.
 
-- **standard**: Claude Code + Codex CLI for interactive use (tmux, shells, etc.)
-- **ralph**: Same tools, plus a "Ralph Wiggum" outer loop harness that repeatedly runs an agent against a prompt until a completion marker appears
-
-Both CLIs are installed via npm:
+Includes Claude Code and Codex CLI, installed via npm:
 - `@openai/codex` - OpenAI Codex CLI
 - `@anthropic-ai/claude-code` - Anthropic Claude Code CLI
 
@@ -47,23 +44,17 @@ Agents can clone and fetch but **cannot push**. All commits stay local in `/work
 
 The `/work/` directory is mounted from your host, so all agent work persists after the container exits.
 
-## Standard shell
+## Usage
 
 ```bash
-docker compose run --rm standard
+docker compose run --rm ralph
 ```
 
 Inside the container you have access to:
 - `claude` - Claude Code CLI (aliased with `--dangerously-skip-permissions`)
 - `codex` - OpenAI Codex CLI (aliased with `--yolo`)
-- `tmux` - Terminal multiplexer
-- `git`, `ripgrep`, `fzf`, `jq`, and other dev tools
-
-## Ralph loop container
-
-```bash
-docker compose run --rm ralph
-```
+- `ralph-loop` - The outer loop harness
+- `tmux`, `git`, `ripgrep`, `jq`, and other dev tools
 
 ### Example: loop Claude on a prompt until it prints a marker
 
@@ -79,7 +70,7 @@ ralph-loop --agent claude --prompt PROMPT.md --max-iter 30 --check "npm test" --
 ralph-loop --agent codex --prompt PROMPT.md --max-iter 30 --check "npm test"
 ```
 
-### Ralph loop options
+### Options
 
 ```
 Usage:
@@ -108,12 +99,12 @@ This creates backpressure through git diffs, builds, and tests, allowing the age
 
 ## AI authentication
 
-Home directories are persisted via Docker volumes, so auth tokens survive container restarts.
+Home directory is persisted via Docker volume, so auth tokens survive container restarts.
 
 **Option 1: CLI login (default)**
 
 ```bash
-docker compose run --rm standard
+docker compose run --rm ralph
 
 # Inside the container:
 claude login          # Opens browser for Anthropic auth
