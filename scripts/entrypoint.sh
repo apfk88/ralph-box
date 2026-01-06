@@ -28,8 +28,9 @@ if [[ -n "${REPO_URL:-}" ]]; then
     cp -r /work/scripts/ralph "${REPO_PATH}/scripts/"
   fi
 
-  cd "${REPO_PATH}"
-  echo "Working directory: ${REPO_PATH}"
+  # Add auto-cd to bashrc so shell starts in repo
+  echo "cd ${REPO_PATH}" >> ~/.bashrc
+  echo "Ready: ${REPO_PATH}"
 fi
 
 # Create ralph function for convenience

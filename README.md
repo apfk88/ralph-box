@@ -2,7 +2,7 @@
 
 Ralph is an autonomous AI coding loop that ships features while you sleep.
 
-Created by [@GeoffreyHuntley](https://twitter.com/GeoffreyHuntley), it runs Claude Code (or your agent of choice) repeatedly until all tasks are complete.
+Created by [@GeoffreyHuntley](https://x.com/GeoffreyHuntley), it runs Claude Code (or your agent of choice) repeatedly until all tasks are complete.
 
 Each iteration is a fresh context window (keeping threads small). Memory persists via git history and text files.
 

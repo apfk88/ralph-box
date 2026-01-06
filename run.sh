@@ -8,7 +8,7 @@ if [[ -z "$REPO_URL" ]]; then
 fi
 
 if [[ -n "$REPO_URL" ]]; then
-  REPO_URL="$REPO_URL" docker-compose run --rm ralph
+  docker-compose run --rm -e REPO_URL="$REPO_URL" ralph
 else
   docker-compose run --rm ralph
 fi
