@@ -1,31 +1,50 @@
 # ralph-box
 
-Ralph-box is a cozy, safe little house for Ralph - the never-stopping yoloing coding AGI - created by [@GeoffreyHuntley](https://x.com/GeoffreyHuntley).
+A containerized environment for running autonomous AI coding agents.
 
-A bash loop that:
-1. Pipes a prompt into your AI agent
-2. Agent picks high priority tasks from `tasks.md`
-3. Agent implements it using subagents
-4. Agent runs typecheck + tests
-5. Agent commits if passing
-6. Agent marks story done
-7. Agent logs learnings
-8. Loop repeats until done
+## Modes
 
-Memory persists only through:
-- Git commits
-- `progress.md` (progress)
-- `tasks.md` (task status)
-- `agents.md` (agent learnings)
+### ralph-swarm (default)
+
+Single AI invocation - the agent handles everything using subagents internally. Inspired by [@GeoffreyHuntley](https://x.com/GeoffreyHuntley)'s Ralph concept.
+
+```bash
+./run.sh https://github.com/your/repo.git
+./run.sh --swarm https://github.com/your/repo.git  # explicit
+```
+
+### ralph-loop
+
+Multiple iterations with file-based memory between runs. Each iteration is a fresh AI context that reads state from `tasks.md` and `progress.md`. Inspired by [@ryancarson](https://x.com/ryancarson/status/2008548371712135632).
+
+```bash
+./run.sh --loop https://github.com/your/repo.git
+```
+
+## AI Tools
+
+Supports both Claude and Codex:
+
+```bash
+./run.sh --claude https://github.com/your/repo.git  # default
+./run.sh --codex https://github.com/your/repo.git
+./run.sh --loop --codex https://github.com/your/repo.git  # combine flags
+```
 
 ## File Structure
 
 ```
-scripts/ralph/
-├── ralph.sh
-├── prompt.md
-├── tasks.md
-└── progress.md
+scripts/
+├── ralph-swarm/
+│   ├── ralph.sh
+│   ├── prompt.md
+│   ├── tasks.md
+│   └── progress.md
+└── ralph-loop/
+    ├── ralph.sh
+    ├── prompt.md
+    ├── tasks.md
+    └── progress.md
 ```
 
 ## GCP VM Setup
@@ -95,6 +114,9 @@ GITHUB_TOKEN=github_pat_xxx
 
 # Anthropic API key (or use `claude login` inside container)
 ANTHROPIC_API_KEY=sk-ant-xxx
+
+# OpenAI API key (for codex)
+OPENAI_API_KEY=sk-xxx
 EOF
 ```
 
@@ -110,18 +132,20 @@ docker-compose build
 # Start tmux session
 tmux new -s ralph
 
-# Run (prompts for repo URL, or pass as argument)
+# Run with repo URL
 ./run.sh https://github.com/your/repo.git
-# or just: ./run.sh (will prompt)
 
-# Inside container (already in repo dir with ralph scripts copied):
+# Inside container:
 # Edit tasks.md with your tasks
 # Edit progress.md with codebase context
 
 # Run Ralph
-ralph           # unlimited iterations
-ralph 10        # max 10 iterations
-ralph -v        # verbose (raw CLI output)
+ralph              # run until done
+ralph -v           # verbose (raw CLI output)
+ralph --codex      # use codex instead of claude
+
+# Loop mode only:
+ralph 10           # max 10 iterations
 
 # Detach from tmux: Ctrl+B, then D
 # Reattach later: tmux attach -t ralph
@@ -130,13 +154,13 @@ ralph -v        # verbose (raw CLI output)
 ### Review and push (from VM, outside container)
 
 ```bash
-cd ~/ralph-box/repo-name
+cd ~/repos/repo-name
 git log --oneline
 # If approved, push with your own creds
 git push
 ```
 
-## Running Multiple Ralph Sessions
+## Running Multiple Sessions
 
 Use separate tmux sessions for each repo:
 
@@ -147,7 +171,7 @@ ralph
 # Ctrl+B, D to detach
 
 tmux new -s repo-b
-./run.sh https://github.com/you/repo-b.git
+./run.sh --loop https://github.com/you/repo-b.git
 ralph
 # Ctrl+B, D to detach
 
@@ -166,14 +190,14 @@ Configure it with:
 - **Repository access** → "Only select repositories" or "All repositories"
 - **Permissions** → "Contents" → "Read-only"
 
-Agents can clone and fetch but **cannot push**. All commits stay local in `/work/`.
+Agents can clone and fetch but **cannot push**. All commits stay local in `/repos/`.
 
 ## AI Authentication
 
 **Option 1: CLI login (default)**
 
 ```bash
-docker-compose run --rm ralph
+docker-compose run --rm ralph-swarm
 
 # Inside the container:
 claude login          # Opens browser for Anthropic auth
@@ -184,6 +208,7 @@ claude login          # Opens browser for Anthropic auth
 ```bash
 # .env file
 ANTHROPIC_API_KEY=your-anthropic-key
+OPENAI_API_KEY=your-openai-key
 ```
 
 Home directory is persisted via Docker volume, so auth tokens survive container restarts.
@@ -203,7 +228,7 @@ git log --oneline -10
 
 ## Notes
 
-- Claude Code runs with `--dangerously-skip-permissions` since the container environment is isolated
+- AI tools run with dangerous permissions since the container environment is isolated
 - Claude config lives at `~/.claude/`
 
 ## tmux Reference
@@ -249,5 +274,5 @@ All commands use `Ctrl+B` as the prefix (press Ctrl+B, release, then press the k
 
 ## Credits
 
-- Ralph concept by [@GeoffreyHuntley](https://twitter.com/GeoffreyHuntley)
-- Guide by [@ryancarson](https://twitter.com/ryancarson)
+- Ralph concept by [@GeoffreyHuntley](https://x.com/GeoffreyHuntley)
+- Loop mode inspired by [@ryancarson](https://x.com/ryancarson/status/2008548371712135632)
