@@ -38,6 +38,8 @@ docker-compose build
 ./run.sh https://github.com/your/repo.git
 ```
 
+> **macOS:** Use `docker compose` (space, not hyphen) if `docker-compose` fails.
+
 Inside the container:
 ```bash
 ralph           # run until done
