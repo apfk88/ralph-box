@@ -125,12 +125,12 @@ while true; do
   if [[ "$VERBOSE" == "true" ]]; then
     # Verbose: raw output
     OUTPUT=$(cat "$SCRIPT_DIR/prompt.md" \
-      | claude --dangerously-skip-permissions 2>&1 \
+      | claude -p --dangerously-skip-permissions 2>&1 \
       | tee /dev/stderr) || true
   else
     # Normal: parse for events
     OUTPUT=$(cat "$SCRIPT_DIR/prompt.md" \
-      | claude --dangerously-skip-permissions 2>&1 \
+      | claude -p --dangerously-skip-permissions 2>&1 \
       | tee >(parse_output >&2)) || true
   fi
 
