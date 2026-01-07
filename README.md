@@ -1,25 +1,40 @@
 # ralph-box
 
-Every Ralph needs a home. A containerized environment for running autonomous AI coding agents (Ralph).
+Every Ralph needs a home. A containerized environment for running autonomous AI coding agents (i.e. letting Ralphs run wild and free).
 
 ## Quick Start
 
+### Option 1: Copy scripts to your repo
+
 ```bash
-# 1. Clone
+# Clone ralph-box
+git clone https://github.com/apfk88/ralph-box.git
+
+# Copy scripts to your project
+cp -r ralph-box/scripts/ralph-swarm your-repo/scripts/ralph
+chmod +x your-repo/scripts/ralph/ralph.sh
+
+# Run from your repo
+cd your-repo
+./scripts/ralph/ralph.sh
+```
+
+### Option 2: Use Docker container
+
+```bash
+# Clone
 git clone https://github.com/apfk88/ralph-box.git
 cd ralph-box
 
-# 2. Add API keys
+# Add API keys
 cat > .env << 'EOF'
 GITHUB_TOKEN=github_pat_xxx
 ANTHROPIC_API_KEY=sk-ant-xxx
 OPENAI_API_KEY=sk-xxx
 EOF
 
-# 3. Build
+# Build and run
 docker-compose build
-
-# 4. Run
 ./run.sh https://github.com/your/repo.git
 ```
 
