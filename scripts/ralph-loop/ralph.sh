@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # ========================================
 # Configuration
 # ========================================
-AI_TOOL="${AI_TOOL:-claude}"
+AI_TOOL="${AI_TOOL:-codex}"
 VERBOSE=false
 MAX_ITERATIONS=0  # 0 = unlimited
 

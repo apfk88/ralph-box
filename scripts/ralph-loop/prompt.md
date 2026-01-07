@@ -2,8 +2,8 @@
 
 ## Your Task
 
-1. Read `scripts/ralph/prd.json`
-2. Read `scripts/ralph/progress.txt`
+1. Read `scripts/ralph/tasks.md`
+2. Read `scripts/ralph/progress.md`
    (check Codebase Patterns first)
 3. Check you're on the correct branch
 4. Pick highest priority story 
@@ -12,8 +12,8 @@
 6. Run typecheck and tests
 7. Update AGENTS.md files with learnings
 8. Commit: `feat: [ID] - [Title]`
-9. Update prd.json: `passes: true`
-10. Append learnings to progress.txt
+9. Update tasks.md: `passes: true`
+10. Append learnings to progress.md
 
 
 ## Progress.md Format
@@ -28,11 +28,9 @@ APPEND to progress.md:
   - Gotchas encountered
 ---
 
-## AGENTS.MD
+## AGENTS.md
 
 Keep AGENT.md up with your learnings to optimise the build/test loop. When you learn something new about how to run/debug the application or examples make sure you update AGENT.md but keep it brief. For example if you run commands multiple times before learning the correct command then that file should be updated.
-
-SUPER IMPORTANT DO NOT IGNORE. DO NOT PLACE STATUS REPORT UPDATES INTO AGENT.md
 
 ## Tasks.md
 

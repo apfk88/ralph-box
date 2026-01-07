@@ -26,10 +26,13 @@ Multiple iterations with file-based memory between runs. Each iteration is a fre
 Supports both Claude and Codex:
 
 ```bash
-./run.sh --claude https://github.com/your/repo.git  # default
-./run.sh --codex https://github.com/your/repo.git
-./run.sh --loop --codex https://github.com/your/repo.git  # combine flags
+./run.sh https://github.com/your/repo.git           # swarm + claude (default)
+./run.sh --codex https://github.com/your/repo.git   # swarm + codex
+./run.sh --loop https://github.com/your/repo.git    # loop + codex (default)
+./run.sh --loop --claude https://github.com/your/repo.git  # loop + claude
 ```
+
+Defaults: **swarm → claude**, **loop → codex**
 
 ## File Structure
 
@@ -229,7 +232,6 @@ git log --oneline -10
 ## Notes
 
 - AI tools run with dangerous permissions since the container environment is isolated
-- Claude config lives at `~/.claude/`
 
 ## tmux Reference
 

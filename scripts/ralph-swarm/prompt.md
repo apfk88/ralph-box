@@ -39,7 +39,7 @@ APPEND to progress.md:
   - Gotchas encountered
 ---
 
-## AGENTS.MD
+## AGENTS.md
 
 Keep AGENT.md up with your learnings to optimise the build/test loop using a subagent. When you learn something new about how to run/debug the application or examples make sure you update AGENT.md using a subagent but keep it brief. For example if you run commands multiple times before learning the correct command then that file should be updated.
 
