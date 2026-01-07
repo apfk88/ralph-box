@@ -1,5 +1,5 @@
 services:
-  ralph:
+  ralph-swarm:
     build:
       context: .
       dockerfile: images/ralph/Dockerfile
@@ -12,6 +12,26 @@ services:
       - ~/repos:/repos
     environment:
       - HOME=/home/ralph
+      - RALPH_MODE=swarm
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
+      - REPO_URL=${REPO_URL:-}
+
+  ralph-loop:
+    build:
+      context: .
+      dockerfile: images/ralph/Dockerfile
+    tty: true
+    stdin_open: true
+    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
+    working_dir: /repos
+    volumes:
+      - ./:/ralph
+      - ~/repos:/repos
+    environment:
+      - HOME=/home/ralph
+      - RALPH_MODE=loop
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
       - GITHUB_TOKEN=${GITHUB_TOKEN:-}

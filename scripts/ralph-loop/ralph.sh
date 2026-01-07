@@ -4,14 +4,25 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # ========================================
-# Argument Parsing
+# Configuration
 # ========================================
+AI_TOOL="${AI_TOOL:-claude}"
 VERBOSE=false
 MAX_ITERATIONS=0  # 0 = unlimited
 
+# AI tool commands
+declare -A AI_CMD
+AI_CMD[claude]="claude -p --dangerously-skip-permissions"
+AI_CMD[codex]="codex --full-auto"
+
+# ========================================
+# Argument Parsing
+# ========================================
 while [[ $# -gt 0 ]]; do
   case $1 in
     -v|--verbose) VERBOSE=true; shift ;;
+    --claude) AI_TOOL="claude"; shift ;;
+    --codex) AI_TOOL="codex"; shift ;;
     *) MAX_ITERATIONS=$1; shift ;;
   esac
 done
@@ -94,13 +105,20 @@ parse_output() {
 # ========================================
 # Main
 # ========================================
-echo "Starting Ralph"
+echo "Starting Ralph (loop mode)"
+echo "AI: ${AI_TOOL}"
 if [[ $MAX_ITERATIONS -eq 0 ]]; then
-  echo "Mode: unlimited iterations"
+  echo "Iterations: unlimited"
 else
-  echo "Mode: max $MAX_ITERATIONS iterations"
+  echo "Iterations: max $MAX_ITERATIONS"
 fi
 [[ "$VERBOSE" == "true" ]] && echo "Verbose: on"
+
+CMD="${AI_CMD[$AI_TOOL]}"
+if [[ -z "$CMD" ]]; then
+  echo "Unknown AI tool: ${AI_TOOL}"
+  exit 1
+fi
 
 init_checksums
 
@@ -121,17 +139,13 @@ while true; do
     printf "\n═══ Iteration %d/%d ═══\n" "$ITERATION" "$MAX_ITERATIONS"
   fi
 
-  # Run Claude
+  # Run AI
   if [[ "$VERBOSE" == "true" ]]; then
     # Verbose: raw output
-    OUTPUT=$(cat "$SCRIPT_DIR/prompt.md" \
-      | claude -p --dangerously-skip-permissions 2>&1 \
-      | tee /dev/stderr) || true
+    OUTPUT=$(cat "$SCRIPT_DIR/prompt.md" | $CMD 2>&1 | tee /dev/stderr) || true
   else
     # Normal: parse for events
-    OUTPUT=$(cat "$SCRIPT_DIR/prompt.md" \
-      | claude -p --dangerously-skip-permissions 2>&1 \
-      | tee >(parse_output >&2)) || true
+    OUTPUT=$(cat "$SCRIPT_DIR/prompt.md" | $CMD 2>&1 | tee >(parse_output >&2)) || true
   fi
 
   # Check file changes

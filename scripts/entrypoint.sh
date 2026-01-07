@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # Container entrypoint
 
+# Determine ralph mode (swarm or loop)
+RALPH_MODE="${RALPH_MODE:-swarm}"
+
 # Set default git identity
 git config --global user.name "ralph"
 git config --global user.email "ralph@localhost"
@@ -25,16 +28,16 @@ if [[ -n "${REPO_URL:-}" ]]; then
     echo "Repo already exists at ${REPO_PATH}"
   fi
 
-  # Copy ralph scripts if not already present
+  # Copy ralph scripts based on mode
   if [[ ! -d "${REPO_PATH}/scripts/ralph" ]]; then
-    echo "Copying ralph scripts..."
+    echo "Copying ralph-${RALPH_MODE} scripts..."
     mkdir -p "${REPO_PATH}/scripts"
-    cp -r /ralph/scripts/ralph "${REPO_PATH}/scripts/"
+    cp -r "/ralph/scripts/ralph-${RALPH_MODE}" "${REPO_PATH}/scripts/ralph"
   fi
 
   # Add auto-cd to bashrc so shell starts in repo
   echo "cd ${REPO_PATH}" >> ~/.bashrc
-  echo "Ready: ${REPO_PATH}"
+  echo "Ready: ${REPO_PATH} (mode: ${RALPH_MODE})"
 fi
 
 # Set up bashrc with prompt, aliases and ralph function
