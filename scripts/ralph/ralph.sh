@@ -106,7 +106,7 @@ init_checksums
 
 ITERATION=0
 while true; do
-  ((ITERATION++))
+  ((++ITERATION))
 
   # Check max iterations (0 = unlimited)
   if [[ $MAX_ITERATIONS -gt 0 && $ITERATION -gt $MAX_ITERATIONS ]]; then
