@@ -38,6 +38,27 @@ if [[ -n "${REPO_URL:-}" ]]; then
   # Add auto-cd to bashrc so shell starts in repo
   echo "cd ${REPO_PATH}" >> ~/.bashrc
   echo "Ready: ${REPO_PATH} (mode: ${RALPH_MODE})"
+
+# Use existing repo if REPO_NAME is set
+elif [[ -n "${REPO_NAME:-}" ]]; then
+  REPO_PATH="/repos/${REPO_NAME}"
+
+  if [[ ! -d "${REPO_PATH}" ]]; then
+    echo "Error: Repo not found at ${REPO_PATH}"
+    echo "Available repos:"
+    ls -1 /repos 2>/dev/null || echo "  (none)"
+  else
+    # Copy ralph scripts based on mode if not present
+    if [[ ! -d "${REPO_PATH}/scripts/ralph" ]]; then
+      echo "Copying ralph-${RALPH_MODE} scripts..."
+      mkdir -p "${REPO_PATH}/scripts"
+      cp -r "/ralph/scripts/ralph-${RALPH_MODE}" "${REPO_PATH}/scripts/ralph"
+    fi
+
+    # Add auto-cd to bashrc so shell starts in repo
+    echo "cd ${REPO_PATH}" >> ~/.bashrc
+    echo "Ready: ${REPO_PATH} (mode: ${RALPH_MODE})"
+  fi
 fi
 
 # Set up bashrc with prompt, aliases and ralph function

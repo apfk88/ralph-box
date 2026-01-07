@@ -1,10 +1,10 @@
 #!/bin/bash
-# Run ralph with optional repo URL
-# Usage: ./run.sh [--loop|--swarm] [--claude|--codex] [repo-url]
+# Run ralph with optional repo URL or local repo name
+# Usage: ./run.sh [--loop|--swarm] [--claude|--codex] [repo-url|repo-name]
 
 MODE="swarm"
 AI_TOOL="claude"
-REPO_URL=""
+REPO=""
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -13,23 +13,34 @@ while [[ $# -gt 0 ]]; do
     --swarm) MODE="swarm"; shift ;;
     --claude) AI_TOOL="claude"; shift ;;
     --codex) AI_TOOL="codex"; shift ;;
-    *) REPO_URL="$1"; shift ;;
+    *) REPO="$1"; shift ;;
   esac
 done
 
-if [[ -z "$REPO_URL" ]]; then
-  read -p "Repo URL (or press enter to skip): " REPO_URL
+if [[ -z "$REPO" ]]; then
+  # List existing repos
+  if [[ -d ~/repos ]] && [[ -n "$(ls -A ~/repos 2>/dev/null)" ]]; then
+    echo "Existing repos in ~/repos:"
+    ls -1 ~/repos
+    echo ""
+  fi
+  read -p "Repo URL or name (enter to skip): " REPO
 fi
 
-# Export user ID/group for container (UID is readonly, use different name)
+# Export user ID/group for container
 export HOST_UID=$(id -u)
 export HOST_GID=$(id -g)
 
 SERVICE="ralph-${MODE}"
-echo "Starting ${SERVICE} with ${AI_TOOL}..."
 
-if [[ -n "$REPO_URL" ]]; then
-  docker-compose run --rm -e REPO_URL="$REPO_URL" -e AI_TOOL="$AI_TOOL" "$SERVICE"
+# Determine if REPO is a URL or local name
+if [[ "$REPO" =~ ^https?:// ]] || [[ "$REPO" =~ ^git@ ]]; then
+  echo "Starting ${SERVICE} with ${AI_TOOL} (cloning ${REPO})..."
+  docker-compose run --rm -e REPO_URL="$REPO" -e AI_TOOL="$AI_TOOL" "$SERVICE"
+elif [[ -n "$REPO" ]]; then
+  echo "Starting ${SERVICE} with ${AI_TOOL} (using existing repo: ${REPO})..."
+  docker-compose run --rm -e REPO_NAME="$REPO" -e AI_TOOL="$AI_TOOL" "$SERVICE"
 else
+  echo "Starting ${SERVICE} with ${AI_TOOL}..."
   docker-compose run --rm -e AI_TOOL="$AI_TOOL" "$SERVICE"
 fi
