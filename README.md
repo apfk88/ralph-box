@@ -1,38 +1,46 @@
 # ralph-box
 
-A containerized environment for running autonomous AI coding agents.
+Every Ralph needs a home. A containerized environment for running autonomous AI coding agents (Ralph).
+
+## Quick Start
+
+```bash
+# 1. Clone
+git clone https://github.com/apfk88/ralph-box.git
+cd ralph-box
+
+# 2. Add API keys
+cat > .env << 'EOF'
+GITHUB_TOKEN=github_pat_xxx
+ANTHROPIC_API_KEY=sk-ant-xxx
+OPENAI_API_KEY=sk-xxx
+EOF
+
+# 3. Build
+docker-compose build
+
+# 4. Run
+./run.sh https://github.com/your/repo.git
+```
+
+Inside the container:
+```bash
+ralph           # run until done
+ralph -v        # verbose output
+```
 
 ## Modes
 
-### ralph-swarm (default)
+| Mode | Command | Default AI | Description |
+|------|---------|------------|-------------|
+| swarm | `./run.sh` | claude | Ralph concept by [@GeoffreyHuntley](https://x.com/GeoffreyHuntley) |
+| loop | `./run.sh --loop` | codex | Loop mode inspired by [@ryancarson](https://x.com/ryancarson/status/2008548371712135632) |
 
-Single AI invocation - the agent handles everything using subagents internally. Inspired by [@GeoffreyHuntley](https://x.com/GeoffreyHuntley)'s Ralph concept.
-
+Override AI tool with `--claude` or `--codex`:
 ```bash
-./run.sh https://github.com/your/repo.git
-./run.sh --swarm https://github.com/your/repo.git  # explicit
+./run.sh --codex https://github.com/your/repo.git
+./run.sh --loop --claude https://github.com/your/repo.git
 ```
-
-### ralph-loop
-
-Multiple iterations with file-based memory between runs. Each iteration is a fresh AI context that reads state from `tasks.md` and `progress.md`. Inspired by [@ryancarson](https://x.com/ryancarson/status/2008548371712135632).
-
-```bash
-./run.sh --loop https://github.com/your/repo.git
-```
-
-## AI Tools
-
-Supports both Claude and Codex:
-
-```bash
-./run.sh https://github.com/your/repo.git           # swarm + claude (default)
-./run.sh --codex https://github.com/your/repo.git   # swarm + codex
-./run.sh --loop https://github.com/your/repo.git    # loop + codex (default)
-./run.sh --loop --claude https://github.com/your/repo.git  # loop + claude
-```
-
-Defaults: **swarm → claude**, **loop → codex**
 
 ## File Structure
 
@@ -50,12 +58,18 @@ scripts/
     └── progress.md
 ```
 
-## GCP VM Setup
+---
 
-### Step 1: Provision VM
+## Detailed Setup
+
+### GCP VM Setup
+
+For long-running agents, use a cloud VM so you can disconnect and let it run.
+
+#### Step 1: Provision VM
 
 ```bash
-ZONE=us-central1-a  # or your preferred zone
+ZONE=us-central1-a
 
 gcloud compute instances create ai-dev-1 \
   --zone=$ZONE \
@@ -66,213 +80,116 @@ gcloud compute instances create ai-dev-1 \
   --boot-disk-size=100GB
 ```
 
-### Step 2: SSH into VM
+#### Step 2: SSH into VM
 
 ```bash
 gcloud compute ssh ai-dev-1 --zone=us-central1-a
 ```
 
-> **Optional:** Install [Tailscale](https://tailscale.com/download) on the VM and configure GCP to use Tailscale SSH for simpler, persistent access without gcloud.
+> **Optional:** Install [Tailscale](https://tailscale.com/download) for simpler SSH access.
 
-### Step 3: Install Docker + Docker Compose
+#### Step 3: Install Docker
 
 ```bash
-# Install Docker
 curl -fsSL https://get.docker.com | sh
-
-# Add your user to docker group
 sudo usermod -aG docker $USER
 newgrp docker
-
-# Install docker-compose
-sudo apt-get update
-sudo apt-get install -y docker-compose
-
-# Verify
-docker --version
-docker-compose --version
+sudo apt-get update && sudo apt-get install -y docker-compose tmux
 ```
 
-### Step 4: Install tmux (required for overnight runs)
-
-```bash
-sudo apt-get install -y tmux
-```
-
-tmux keeps Ralph running even if your SSH connection drops. See [tmux Reference](#tmux-reference) below.
-
-### Step 5: Clone ralph-box
+#### Step 4: Clone and configure
 
 ```bash
 git clone https://github.com/apfk88/ralph-box.git
 cd ralph-box
-```
 
-### Step 6: Create .env file
-
-```bash
 cat > .env << 'EOF'
-# GitHub read-only PAT (create at https://github.com/settings/tokens?type=beta)
 GITHUB_TOKEN=github_pat_xxx
-
-# Anthropic API key (or use `claude login` inside container)
 ANTHROPIC_API_KEY=sk-ant-xxx
-
-# OpenAI API key (for codex)
 OPENAI_API_KEY=sk-xxx
 EOF
-```
 
-### Step 7: Build the container
-
-```bash
 docker-compose build
 ```
 
-## Running Ralph
+### Running with tmux
+
+tmux keeps Ralph running when you disconnect:
 
 ```bash
-# Start tmux session
 tmux new -s ralph
-
-# Run with repo URL
 ./run.sh https://github.com/your/repo.git
-
-# Inside container:
-# Edit tasks.md with your tasks
-# Edit progress.md with codebase context
-
-# Run Ralph
-ralph              # run until done
-ralph -v           # verbose (raw CLI output)
-ralph --codex      # use codex instead of claude
-
-# Loop mode only:
-ralph 10           # max 10 iterations
-
-# Detach from tmux: Ctrl+B, then D
-# Reattach later: tmux attach -t ralph
+ralph
+# Ctrl+B, D to detach
 ```
 
-### Review and push (from VM, outside container)
-
+Reconnect later:
 ```bash
-cd ~/repos/repo-name
-git log --oneline
-# If approved, push with your own creds
-git push
+tmux attach -t ralph
 ```
 
-## Running Multiple Sessions
-
-Use separate tmux sessions for each repo:
+### Multiple Sessions
 
 ```bash
 tmux new -s repo-a
 ./run.sh https://github.com/you/repo-a.git
-ralph
-# Ctrl+B, D to detach
+# Ctrl+B, D
 
 tmux new -s repo-b
 ./run.sh --loop https://github.com/you/repo-b.git
-ralph
-# Ctrl+B, D to detach
+# Ctrl+B, D
 
-# List sessions
-tmux ls
-tmux attach -t repo-a
+tmux ls                    # list sessions
+tmux attach -t repo-a      # reattach
 ```
 
-## GitHub Access
+### GitHub Access
 
-Agents get **read-only** GitHub access via a fine-grained PAT. Create one at:
+Create a read-only PAT at **https://github.com/settings/tokens?type=beta**
 
-**https://github.com/settings/tokens?type=beta**
+- **Repository access** → Select repositories
+- **Permissions** → Contents → Read-only
 
-Configure it with:
-- **Repository access** → "Only select repositories" or "All repositories"
-- **Permissions** → "Contents" → "Read-only"
+Agents can clone/fetch but cannot push.
 
-Agents can clone and fetch but **cannot push**. All commits stay local in `/repos/`.
+### AI Authentication
 
-## AI Authentication
-
-**Option 1: CLI login (default)**
-
+**CLI login:**
 ```bash
 docker-compose run --rm ralph-swarm
-
-# Inside the container:
-claude login          # Opens browser for Anthropic auth
+claude login    # inside container
 ```
 
-**Option 2: API keys**
+**Or use API keys** in `.env` (see Quick Start).
+
+### Monitoring
 
 ```bash
-# .env file
-ANTHROPIC_API_KEY=your-anthropic-key
-OPENAI_API_KEY=your-openai-key
+cat scripts/ralph/tasks.md      # task status
+cat scripts/ralph/progress.md   # progress log
+git log --oneline -10           # commits
 ```
 
-Home directory is persisted via Docker volume, so auth tokens survive container restarts.
-
-## Monitoring
-
-```bash
-# Task status
-cat scripts/ralph/tasks.md
-
-# Progress log
-cat scripts/ralph/progress.md
-
-# Commits
-git log --oneline -10
-```
-
-## Notes
-
-- AI tools run with dangerous permissions since the container environment is isolated
+---
 
 ## tmux Reference
 
-All commands use `Ctrl+B` as the prefix (press Ctrl+B, release, then press the key).
+Prefix: `Ctrl+B` (press, release, then press key)
 
-### Sessions
 | Command | Description |
 |---------|-------------|
-| `tmux new -s name` | Create new session |
-| `tmux attach -t name` | Attach to session |
+| `tmux new -s name` | New session |
+| `tmux attach -t name` | Attach |
 | `tmux ls` | List sessions |
-| `Ctrl+B, D` | Detach from session |
-| `Ctrl+B, $` | Rename session |
-
-### Windows (tabs)
-| Command | Description |
-|---------|-------------|
-| `Ctrl+B, C` | Create new window |
-| `Ctrl+B, N` | Next window |
-| `Ctrl+B, P` | Previous window |
-| `Ctrl+B, 0-9` | Switch to window by number |
-| `Ctrl+B, ,` | Rename window |
-| `Ctrl+B, &` | Kill window |
-
-### Panes (splits)
-| Command | Description |
-|---------|-------------|
+| `Ctrl+B, D` | Detach |
+| `Ctrl+B, C` | New window |
+| `Ctrl+B, N/P` | Next/prev window |
 | `Ctrl+B, %` | Split vertical |
 | `Ctrl+B, "` | Split horizontal |
 | `Ctrl+B, Arrow` | Move between panes |
-| `Ctrl+B, X` | Kill pane |
-| `Ctrl+B, Z` | Toggle pane zoom (fullscreen) |
-| `Ctrl+B, Space` | Cycle pane layouts |
+| `Ctrl+B, [` | Scroll mode (q to exit) |
 
-### Scrolling
-| Command | Description |
-|---------|-------------|
-| `Ctrl+B, [` | Enter scroll mode |
-| `q` | Exit scroll mode |
-| `Up/Down` | Scroll line by line |
-| `PgUp/PgDn` | Scroll page by page |
+---
 
 ## Credits
 
