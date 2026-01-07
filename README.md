@@ -188,10 +188,3 @@ Prefix: `Ctrl+B` (press, release, then press key)
 | `Ctrl+B, "` | Split horizontal |
 | `Ctrl+B, Arrow` | Move between panes |
 | `Ctrl+B, [` | Scroll mode (q to exit) |
-
----
-
-## Credits
-
-- Ralph concept by [@GeoffreyHuntley](https://x.com/GeoffreyHuntley)
-- Loop mode inspired by [@ryancarson](https://x.com/ryancarson/status/2008548371712135632)
